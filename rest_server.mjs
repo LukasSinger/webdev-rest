@@ -73,7 +73,7 @@ app.get("/codes", async (req, res) => {
     if (codes) codes = codes.split(",");
     let data;
     try {
-        data = await dbSelect("SELECT * FROM Codes");
+        data = await dbSelect("SELECT * FROM Codes ORDER BY code");
     } catch (err) {
         console.error(err);
         res.status(500).type("text/html").send("500 Internal Server Error");
