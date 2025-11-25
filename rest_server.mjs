@@ -93,10 +93,28 @@ app.get("/codes", async (req, res) => {
 });
 
 // GET request handler for neighborhoods
-app.get("/neighborhoods", (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
-
-    res.status(200).type("json").send({}); // <-- you will need to change this
+app.get("/neighborhoods", async (req, res) => {
+    let ids = req.query["id"];
+    if (ids) ids = ids.split(",");
+    let data;
+    try {
+        data = await dbSelect("SELECT * FROM Neighborhoods ORDER BY neighborhood_number");
+    } catch (err) {
+        console.error(err);
+        res.status(500).type("text/html").send("500 Internal Server Error");
+        return;
+    }
+    const resData = [];
+    for (const entry of data) {
+        if (!ids || ids.includes(entry["neighborhood_number"].toString())) {
+            resData.push({
+                id: entry["neighborhood_number"],
+                name: entry["neighborhood_name"]
+            });
+        }
+    }
+    if (resData.length > 0) res.status(200).type("json").send(resData);
+    else res.status(404).type("text/html").send("404 Not Found");
 });
 
 // GET request handler for crime incidents
