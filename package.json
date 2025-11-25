@@ -18,8 +18,8 @@
         "url": "git+https://github.com/LukasSinger/webdev-rest.git"
     },
     "dependencies": {
-        "better-sqlite3": "^12.4.1",
-        "express": "^4.18.2"
+        "express": "^4.18.2",
+        "sqlite3": "^5.1.7"
     },
     "scripts": {
         "start": "node rest_server.mjs"
