@@ -120,7 +120,7 @@ app.get('/incidents', (req, res) => {
     query += " ORDER BY date_time";
     query += " LIMIT ?";
     params.push(limit);
-    console.log(query, params)
+    //console.log(query, params)
     dbSelect(query, params).then(rows => {
         let response = [];
         for (let row of rows) {
@@ -150,15 +150,15 @@ app.put('/new-incident', (req, res) => {
 });
 
 // DELETE request handler for new crime incident
-app.delete('/remove-incident', async (req, res) => {
-    console.log(req.body); // uploaded data
+app.delete('/remove-incident', (req, res) => {
+    //console.log(req.body); // uploaded data
     const number = req.body["case_number"];
-    dbSelect("select * from Incident where case_number=?", [number])
+    dbSelect("select * from Incidents where case_number=?", [number])
     .then(rows => {
         if(rows.length == 0) {
             throw "Invalid case number";
         }
-        return dbRun("delete from Incident where case_number=?", [number])
+        return dbRun("delete from Incidents where case_number=?", [number])
     })
     .then(() => {
         res.status(200).type("txt").send("OK");
