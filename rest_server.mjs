@@ -68,10 +68,28 @@ function formatDate(dateStr) {
  ***   REST REQUEST HANDLERS                                      ***
  ********************************************************************/
 // GET request handler for crime codes
-app.get("/codes", (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
-
-    res.status(200).type("json").send({}); // <-- you will need to change this
+app.get("/codes", async (req, res) => {
+    let codes = req.query["code"];
+    if (codes) codes = codes.split(",");
+    let data;
+    try {
+        data = await dbSelect("SELECT * FROM Codes");
+    } catch (err) {
+        console.error(err);
+        res.status(500).type("text/html").send("500 Internal Server Error");
+        return;
+    }
+    const resData = [];
+    for (const entry of data) {
+        if (!codes || codes.includes(entry["code"].toString())) {
+            resData.push({
+                code: entry["code"],
+                type: entry["incident_type"]
+            });
+        }
+    }
+    if (resData.length > 0) res.status(200).type("json").send(resData);
+    else res.status(404).type("text/html").send("404 Not Found");
 });
 
 // GET request handler for neighborhoods
