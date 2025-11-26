@@ -128,7 +128,7 @@ app.get("/codes", async (req, res) => {
             });
         }
     }
-    res.status(200).type("json").send(resData);
+    res.status(200).type("json").send(JSON.stringify(resData, null, 2));
 });
 
 // GET request handler for neighborhoods
@@ -152,7 +152,7 @@ app.get("/neighborhoods", async (req, res) => {
             });
         }
     }
-    res.status(200).type("json").send(resData);
+    res.status(200).type("json").send(JSON.stringify(resData, null, 2));
 });
 
 // GET request handler for crime incidents
