@@ -65,6 +65,14 @@ function formatDate(dateStr) {
     return `${year}-${month}-${day}`;
 }
 
+function prettyPrintCompact(obj) {
+    let result = JSON.stringify(obj, null, 2);
+    result = result.replaceAll("{\n    ", "{");
+    result = result.replaceAll("\n  }", "}");
+    result = result.replaceAll(",\n    ", ", ");
+    return result;
+}
+
 /**
  * Enforces valid form of incoming data to PUT /new-incident.
  * @param {object} data The data to sanitize.
@@ -128,7 +136,7 @@ app.get("/codes", async (req, res) => {
             });
         }
     }
-    res.status(200).type("json").send(JSON.stringify(resData, null, 2));
+    res.status(200).type("json").send(prettyPrintCompact(resData));
 });
 
 // GET request handler for neighborhoods
@@ -152,7 +160,7 @@ app.get("/neighborhoods", async (req, res) => {
             });
         }
     }
-    res.status(200).type("json").send(JSON.stringify(resData, null, 2));
+    res.status(200).type("json").send(prettyPrintCompact(resData));
 });
 
 // GET request handler for crime incidents
