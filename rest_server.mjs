@@ -246,7 +246,7 @@ app.put("/new-incident", async (req, res) => {
         collisionValues = await dbSelect("SELECT case_number FROM Incidents WHERE case_number = ?", [data["case_number"]]);
     } catch (err) {
         console.log(err);
-        res.status(500).type;
+        res.status(500).type("text/html").send("500 Internal Server Error");
         return;
     }
     if (collisionValues.length > 0) {
