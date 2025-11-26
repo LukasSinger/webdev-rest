@@ -128,8 +128,7 @@ app.get("/codes", async (req, res) => {
             });
         }
     }
-    if (resData.length > 0) res.status(200).type("json").send(resData);
-    else res.status(404).type("text/html").send("404 Not Found");
+    res.status(200).type("json").send(resData);
 });
 
 // GET request handler for neighborhoods
@@ -153,8 +152,7 @@ app.get("/neighborhoods", async (req, res) => {
             });
         }
     }
-    if (resData.length > 0) res.status(200).type("json").send(resData);
-    else res.status(404).type("text/html").send("404 Not Found");
+    res.status(200).type("json").send(resData);
 });
 
 // GET request handler for crime incidents
