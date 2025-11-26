@@ -64,6 +64,46 @@ function formatDate(dateStr) {
     const day = date.getDate().toString().padStart(2, "0");
     return `${year}-${month}-${day}`;
 }
+
+/**
+ * Enforces valid form of incoming data to PUT /new-incident.
+ * @param {object} data The data to sanitize.
+ * @returns An object that complies with the available columns and their data types, or null if data is invalid.
+ */
+function sanitizeNewIncident(data) {
+    // Format/validate date and time
+    const dateStr = String(data["date"]) + " " + String(data["time"]);
+    if (Number.isNaN(new Date(dateStr).valueOf())) return null;
+    const dateTime = formatDate(dateStr) + " " + formatTime(dateStr);
+    // Validate code
+    const code = Number(data["code"]);
+    if (!isInteger(code)) return null;
+    // Validate police_grid
+    const policeGrid = Number(data["police_grid"]);
+    if (!isInteger(policeGrid)) return null;
+    // Validate neighborhood_number
+    const neighborhoodNumber = Number(data["neighborhood_number"]);
+    if (!isInteger(neighborhoodNumber)) return null;
+
+    return {
+        case_number: String(data["case_number"]),
+        date_time: dateTime,
+        code: code,
+        incident: String(data["incident"]),
+        police_grid: policeGrid,
+        neighborhood_number: neighborhoodNumber,
+        block: String(data["block"])
+    };
+}
+
+/**
+ * Returns whether the number is an integer.
+ * @param {number} number The number to check.
+ */
+function isInteger(number) {
+    return Number.isNaN(number) || Math.round(number) === number;
+}
+
 /********************************************************************
  ***   REST REQUEST HANDLERS                                      ***
  ********************************************************************/
@@ -187,10 +227,39 @@ app.get("/incidents", (req, res) => {
 });
 
 // PUT request handler for new crime incident
-app.put("/new-incident", (req, res) => {
-    console.log(req.body); // uploaded data
-
-    res.status(200).type("txt").send("OK"); // <-- you may need to change this
+app.put("/new-incident", async (req, res) => {
+    // Enforce data structure
+    const data = sanitizeNewIncident(req.body);
+    if (!data) {
+        res.status(400).type("text/html").send("400 Bad Request");
+        return;
+    }
+    // Check for case number collision
+    let collisionValues;
+    try {
+        collisionValues = await dbSelect("SELECT case_number FROM Incidents WHERE case_number = ?", [data["case_number"]]);
+    } catch (err) {
+        console.log(err);
+        res.status(500).type;
+        return;
+    }
+    if (collisionValues.length > 0) {
+        // This situation is conventionally status 4xx, but API spec requires 500
+        res.status(500).type("text/html").send("Could not add incident: case number already exists");
+        return;
+    }
+    // Insert the new entry
+    let dbQuery = "INSERT INTO Incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES (";
+    dbQuery += "?,".repeat(Object.keys(data).length - 1);
+    dbQuery += "?)";
+    try {
+        await dbRun(dbQuery, Object.values(data));
+    } catch (err) {
+        console.error(err);
+        res.status(500).type("text/html").send("500 Internal Server Error");
+        return;
+    }
+    res.status(200).type("txt").send("OK");
 });
 
 // DELETE request handler for new crime incident
